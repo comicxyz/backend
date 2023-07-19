@@ -2,8 +2,8 @@ import { pino } from 'pino';
 import { Knex } from 'knex';
 import { extractCoverQueue } from './Queue.js';
 import models from '../models/index.js';
-import ScanDirConfig from '../models/ScanDirConfig.js';
 import extractFirstImage from '../utils/extractFirstImage.js';
+import { AppConfig } from '../@types/AppConfig.js';
 
 type LoggerType = pino.BaseLogger & {
   child(bindings: pino.Bindings, options?: pino.ChildLoggerOptions): LoggerType
@@ -12,7 +12,7 @@ type LoggerType = pino.BaseLogger & {
 export default (modules: {
   log: LoggerType,
   models: typeof models,
-  config: ScanDirConfig['configValue']
+  config: AppConfig
   knex: Knex,
 }) => {
   const logger = modules.log.child({ worker: 'ExtractCover' });

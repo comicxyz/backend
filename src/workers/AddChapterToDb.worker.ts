@@ -7,14 +7,14 @@ import parseVolumeFromString from '../utils/parseVolumeFromString.js';
 import { ComicInfoXmlInterface } from '../@types/ComicInfoXmlInterface.js';
 import { onFinishedAddChapterToDatabase, onFailedAddChapterToDatabase } from './hooks.js';
 import models from '../models/index.js';
-import ScanDirConfig from '../models/ScanDirConfig.js';
 import extractFirstImage from '../utils/extractFirstImage.js';
 import BaseLogger from '../@types/BaseLogger.js';
+import { AppConfig } from '../@types/AppConfig.js';
 
 export default (modules: {
   log: BaseLogger,
   models: typeof models,
-  config: ScanDirConfig['configValue']
+  config: AppConfig
   knex: Knex,
 }) => {
   const logger = modules.log.child({ worker: 'AddChaptersToDB' });
