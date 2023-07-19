@@ -37,7 +37,7 @@ async function start() {
       ...knexSnakeCaseMappers({
         upperCase: false,
       }),
-      debug: true || app.config.DB_DEBUG,
+      debug: process.env.DB_DEBUG ? process.env.DB_DEBUG.toLowerCase() !== 'false' : false,
     },
     models: Models,
   });
