@@ -19,9 +19,6 @@ export default function DownloadChapters(app: {
   config: AppConfig }) {
   const logger = app.log.child({ worker: 'DownloadChapters' });
   logger.info('Worker started');
-  logger.info('All chapters will be saved to %s', app.config.MANGA_DIR);
-  logger.info('All temp chapters will be saved to %s', app.config.MANGA_DIR_TEMP);
-  logger.info('Number of workers: %s', app.config.NUM_CHAPTER_WORKERS);
 
   getAllDownloaders(app.config.DOWNLOADERS_DIR).then((downloaders) => {
     if (Object.keys(downloaders).length === 0) {
