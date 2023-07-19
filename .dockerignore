@@ -5,3 +5,4 @@ logs
 manga
 **/dev.*
 .git
+.env
