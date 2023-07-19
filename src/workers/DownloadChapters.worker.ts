@@ -3,6 +3,7 @@ import slugify from 'slugify';
 import { existsSync } from 'fs';
 import { rimraf } from 'rimraf';
 import { join, resolve } from 'path';
+import sanitize from 'sanitize-filename';
 import { chaptersQueue, zipQueue } from './Queue.js';
 import { generateChapterDirPath, makeChapterDirectory } from '../utils/generateChapterDirectory.js';
 import createChapterZippedFileFromArrayOfImageUrls from '../utils/createChapterZippedFileFromArrayOfImageUrls.js';
@@ -41,7 +42,11 @@ export default function DownloadChapters(app: {
     } = job.data;
     const comicUrl = new URL(url);
     const { host } = comicUrl;
-    const dirPath = generateChapterDirPath('', slugify(seriesTitle), '', slugify(title));
+    const dirPath = generateChapterDirPath(
+      sanitize(slugify(seriesTitle)),
+      sanitize(slugify(title)),
+      app.config.MANGA_DIR,
+    );
 
     const log = logger.child({ jobId: job.id });
 
