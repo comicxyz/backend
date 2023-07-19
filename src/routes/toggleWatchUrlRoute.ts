@@ -27,7 +27,7 @@ function toggleWatchUrlRoute(app: FastifyInstance) {
       await watchUrlQueue.add({ url: chapter?.website }, {
         jobId: chapter.website,
         repeat: {
-          cron: `${(dayjs().minute() + 1) % 60} */${dayjs().hour() === 0 ? 24 : dayjs().hour()} * * *`,
+          cron: `${(dayjs().minute() + 5) % 60} */${dayjs().hour() === 0 ? 24 : dayjs().hour()} * * *`,
         },
       });
       request.log.info({ repeatableJobs }, 'Add repeatable job');
