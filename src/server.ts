@@ -42,6 +42,15 @@ async function start() {
     models: Models,
   });
 
+  try {
+    await app.objection.knex.migrate.up({
+      directory: './dist/migrations',
+      extension: 'cjs',
+    });
+  } catch (err) {
+    app.log.error({ err }, 'Cannot run migrations.');
+  }
+
   const config = await loadConfig({ moduleName: 'APIServer', log: app.log, models: app.objection.models });
   app.decorate('config', config);
   // eslint-disable-next-line no-console
@@ -63,15 +72,6 @@ async function start() {
   } catch (err) {
     app.log.fatal(err, 'Cannot make directories.');
     process.exit(1);
-  }
-
-  try {
-    await app.objection.knex.migrate.up({
-      directory: './dist/migrations',
-      extension: 'cjs',
-    });
-  } catch (err) {
-    app.log.error({ err }, 'Cannot run migrations.');
   }
 
   await app.register(ioredisPlugin, { confKey: 'redis', redisConfig: app.config });
