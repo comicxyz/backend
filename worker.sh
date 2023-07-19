@@ -1,0 +1,1 @@
+node -r dotenv/config dist/workers/workers.standalone.js | pino-elasticsearch --node http://localhost:9200 --index worker

@@ -1,0 +1,12 @@
+node_modules
+dist
+.env
+yarn-error.log
+coverage
+logs
+manga/
+.env
+.DS_STORE
+*.log
+build/
+**/dev.*

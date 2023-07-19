@@ -1,0 +1,29 @@
+version: "3.3"
+services:
+  frontend:
+    image: comicxyz/frontend
+    depends_on:
+      - backend
+    ports:
+      - 8080:8080
+  backend:
+    image: comicxyz/backend
+    depends_on:
+      - db
+      - redis
+    ports:
+      - 3000:3000
+    environment:
+      - REDIS_HOST=redis
+      - DB_HOST=db
+      - DB_NAME=database
+      - DB_USER=admin
+      - DB_PASSWORD=password
+  redis:
+    image: redis
+  db:
+    image: postgres
+    environment:
+     - POSTGRES_DB=database
+     - POSTGRES_USER=admin
+     - POSTGRES_PASSWORD=password
