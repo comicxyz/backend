@@ -23,7 +23,7 @@ export const ScanDirConfigSchema = {
     type: 'string',
     enum: ['always', 'noCoverOnly', 'newOnly', 'never',
       'always-deferred', 'noCoverOnly-deferred', 'newOnly-deferred'],
-    default: 'never',
+    default: 'noCoverOnly-deferred',
   },
 };
 
