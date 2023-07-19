@@ -13,7 +13,7 @@
     "test": "yarn jest",
     "test:watch": "yarn jest --watch",
     "dev": "yarn run nodemon --watch src -e ts,js,json,yml --ignore 'dist/*' --exec 'yarn run start'",
-    "dev-w": "yarn run nodemon --watch src -e ts,js,json,yml --ignore 'dist/*' --exec 'yarn run compile && node -r dotenv/config dist/workers/startDownloadChaptersWorker.js'",
+    "dev-w": "yarn run nodemon --watch src -e ts,js,json,yml --ignore 'dist/*' --exec 'yarn run compile && node -r dotenv/config dist/workers/startWorkers.js'",
     "compile": "yarn tsc && yarn run copy-files",
     "start": "yarn run compile && node -r dotenv/config dist/server.js",
     "copy-files": "mkdir dist/migrations; cp src/migrations/* dist/migrations"
@@ -75,6 +75,7 @@
     "pump": "^3.0.0",
     "recursive-readdir": "^2.2.3",
     "rimraf": "^5.0.1",
+    "sanitize-filename": "^1.6.3",
     "slugify": "^1.6.6",
     "split2": "^4.2.0",
     "webp-converter": "^2.3.3",
