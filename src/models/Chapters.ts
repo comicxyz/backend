@@ -1,4 +1,6 @@
-import { Model, snakeCaseMappers } from 'objection';
+import Objection, { Model, QueryContext, snakeCaseMappers } from 'objection';
+import sanitize from 'sanitize-filename';
+import slugify from 'slugify';
 
 class ChaptersModel extends Model {
   id!: number;
@@ -25,6 +27,8 @@ class ChaptersModel extends Model {
 
   publishedAt?: Date;
 
+  letterGroup!: string;
+
   static get tableName() {
     return 'chapters';
   }
@@ -35,6 +39,28 @@ class ChaptersModel extends Model {
 
   static get idColumn() {
     return 'id';
+  }
+
+  getLetterGroup() {
+    let letter = slugify(sanitize(this.seriesTitle[0])).toUpperCase();
+    if ('ABCDEFGHIJKLMNOPQRSTUVWXYZ'.indexOf(letter) === -1 || letter === '') {
+      letter = '#';
+    }
+
+    this.letterGroup = letter;
+  }
+
+  async $beforeInsert(queryContext: QueryContext) {
+    await super.$beforeInsert(queryContext);
+    this.getLetterGroup();
+  }
+
+  async $beforeUpdate(
+    opt: Objection.ModelOptions,
+    queryContext: QueryContext,
+  ) {
+    await super.$beforeUpdate(opt, queryContext);
+    this.getLetterGroup();
   }
 }
 
