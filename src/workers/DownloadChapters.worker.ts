@@ -4,7 +4,7 @@ import { existsSync } from 'fs';
 import { rimraf } from 'rimraf';
 import { join, resolve } from 'path';
 import sanitize from 'sanitize-filename';
-import { chaptersQueue, zipQueue } from './Queue.js';
+import { QUEUE_NAMES, chaptersQueue, zipQueue } from './Queue.js';
 import { generateChapterDirPath, makeChapterDirectory } from '../utils/generateChapterDirectory.js';
 import createChapterZippedFileFromArrayOfImageUrls from '../utils/createChapterZippedFileFromArrayOfImageUrls.js';
 import writeComicInfoXmlFile from '../utils/writeComicInfoXmlFile.js';
@@ -36,6 +36,8 @@ export default function DownloadChapters(app: {
   const { NUM_CHAPTER_WORKERS } = app.config;
 
   chaptersQueue.process(NUM_CHAPTER_WORKERS, async (job) => {
+    const log = logger.child({ jobId: job.id, logJob: QUEUE_NAMES.DOWNLOAD_CHAPTERS });
+
     const services = await getAllDownloaders(app.config.DOWNLOADERS_DIR);
     const {
       url, title, seriesTitle, comicInfoXml,
@@ -47,8 +49,6 @@ export default function DownloadChapters(app: {
       sanitize(slugify(title)),
       app.config.MANGA_DIR,
     );
-
-    const log = logger.child({ jobId: job.id });
 
     if (existsSync(dirPath)) {
       log.info('Cleaning directory %s', dirPath);
@@ -118,7 +118,7 @@ export default function DownloadChapters(app: {
   });
 
   chaptersQueue.on('completed', (job, result: { chapter: ChapterInterface, targetDirPath: string, outputPath: string }) => {
-    const log = logger.child({ jobId: job.id });
+    const log = logger.child({ jobId: job.id, logJob: QUEUE_NAMES.DOWNLOAD_CHAPTERS });
     log.info('Chapter downloaded %s %s (%s)', job.data.seriesTitle, job.data.title, job.name);
     zipQueue.getJob(job.id).then((existingJob) => {
       if (existingJob) {

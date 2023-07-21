@@ -48,7 +48,11 @@ const TitleProcessQueue = () => new Queue<{ url: string, category?: string }>('c
   },
 });
 
-const ChaptersQueue = () => new Queue<ChapterInterface>('comicxyz:chapters', {
+export const QUEUE_NAMES = {
+  DOWNLOAD_CHAPTERS: 'comicxyz:download-chapters',
+};
+
+const ChaptersQueue = () => new Queue<ChapterInterface>(QUEUE_NAMES.DOWNLOAD_CHAPTERS, {
   createClient,
   defaultJobOptions: {
     removeOnComplete: 100,
