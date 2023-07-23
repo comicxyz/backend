@@ -23,7 +23,7 @@ export default (modules: {
     jobLogger.info({ jobData: job.data }, 'Extracting Cover (ID: %s)', job.id);
     const base64Thumbnail = await extractFirstImage(job.data.file);
     const ChapterModel = modules.models.ChaptersModel.query();
-    return ChapterModel.updateAndFetchById(job.data.id, {
+    return ChapterModel.where('filePath', job.data.file).update({
       base64Thumbnail,
     });
   })

@@ -3,6 +3,7 @@ import zip from '../utils/zip.js';
 import { addChapterToDbQueue, zipQueue } from './Queue.js';
 import { onFailedZipChapter, onFinishedZipChapter, onStartedZipChapter } from './hooks.js';
 import BaseLogger from '../@types/BaseLogger.js';
+import loadConfig from '../config/loadConfig.js';
 
 export default function ZipDownloadedChapters(args: { log: BaseLogger }) {
   const logger = args.log.child({ worker: 'ZipDownloadedChapters' });
@@ -34,7 +35,12 @@ export default function ZipDownloadedChapters(args: { log: BaseLogger }) {
       log.info('Removed temp folder', job.data.targetDirPath);
     });
 
-    await addChapterToDbQueue.add({ filePath: job.data.outputPath });
+    const config = await loadConfig({ moduleName: 'ZipDownloadedChapters', log });
+
+    await addChapterToDbQueue.add({
+      filePath: job.data.outputPath,
+      extractCover: config.SCAN_DIR_EXTRACT_COVER,
+    });
 
     try {
       await onFinishedZipChapter(job);

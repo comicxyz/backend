@@ -13,7 +13,7 @@ export const ScanDirConfigSchema = {
   SCAN_DIR_NUM_WORKERS: { type: 'integer', default: 1 },
   SCAN_DIR_PATH: { type: 'string', minLength: 1 },
   SCAN_DIR_EXT: { type: 'array', items: { type: 'string' }, default: ['.cbz'] },
-  SCAN_DIR_SKIP_EXISTING: { type: 'boolean', default: true },
+  SCAN_DIR_SKIP_EXISTING: { type: 'boolean', default: false },
   SCAN_DIR_CRON: { type: 'string', minLength: 1, default: '0 0 * * *' },
   // true = always
   // ifNoCover = only if no cover (new files will be updated too)

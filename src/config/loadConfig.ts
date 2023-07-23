@@ -14,8 +14,8 @@ async function loadConfig(args: { moduleName: string, log: BaseLogger, models?: 
 
   const scanDirConfig = await models.ScanDirConfigModel.getConfig();
 
-  args.log.info({ scanDirConfig }, 'scanDirConfig');
-  args.log.info({ config }, `Config loaded by ${args.moduleName}`);
+  // args.log.info({ scanDirConfig }, 'scanDirConfig');
+  // args.log.info({ config }, `Config loaded by ${args.moduleName}`);
 
   const mergedConfig = { ...scanDirConfig, ...config };
 

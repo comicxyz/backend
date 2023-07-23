@@ -7,7 +7,6 @@ import parseVolumeFromString from '../utils/parseVolumeFromString.js';
 import { ComicInfoXmlInterface } from '../@types/ComicInfoXmlInterface.js';
 import { onFinishedAddChapterToDatabase, onFailedAddChapterToDatabase } from './hooks.js';
 import models from '../models/index.js';
-import extractFirstImage from '../utils/extractFirstImage.js';
 import BaseLogger from '../@types/BaseLogger.js';
 import { AppConfig } from '../@types/AppConfig.js';
 
@@ -38,7 +37,7 @@ export default (modules: {
 
   addChapterToDbQueue.process(modules.config.SCAN_DIR_NUM_WORKERS || 4, async (job) => {
     const jobLogger = logger.child({ jobId: job.id });
-    jobLogger.info({ jobData: job.data }, 'Processing job (ID: %s)', job.id);
+    jobLogger.info({ jobData: job.data }, 'Processing job adding chapter to database (ID: %s)', job.id);
     jobLogger.info('Adding %s to database', job.data.filePath);
 
     const ChapterModel = modules.models.ChaptersModel.query();
@@ -47,27 +46,31 @@ export default (modules: {
 
     async function extractCover(
       file: string,
-      id: null | number,
-    ): Promise<string | undefined> {
-      if (id !== null) {
-        await extractCoverQueue.add({ file, id }, { jobId: file });
-        return undefined;
+    ): Promise<void> {
+      if (job.data.extractCover === 'never') {
+        return;
       }
-      return extractFirstImage(job.data.filePath);
+
+      const row = await ChapterModel.findOne({ filePath: job.data.filePath });
+
+      if (!row) {
+        throw new Error('Cannot find chapter. Unable to extract cover');
+      }
+
+      if (job.data.extractCover === 'noCoverOnly' && row.base64Thumbnail) {
+        return;
+      }
+
+      jobLogger.info('Extracting cover from %s', file);
+
+      await extractCoverQueue.add({ file }, { jobId: file });
     }
 
-    if (exists && modules.config.SCAN_DIR_SKIP_EXISTING) {
-      jobLogger.info('File %s already on database. Skipping...', job.data.filePath);
-      return 'skipped';
-    }
-
-    let thumbnail: string | null | undefined;
-    if (modules.config.SCAN_DIR_EXTRACT_COVER === 'always') {
-      try {
-        thumbnail = await extractCover(job.data.filePath, null);
-      } catch (errExtractImage) {
-        jobLogger.error({ err: errExtractImage }, 'Error extracting image from file');
-        thumbnail = undefined;
+    if (exists) {
+      await extractCover(job.data.filePath);
+      if (job.data.skipExisting) {
+        jobLogger.info('File %s already on database. Skipping...', job.data.filePath);
+        return 'skipped';
       }
     }
 
@@ -97,28 +100,6 @@ export default (modules: {
     if (exists) {
       jobLogger.info('File %s already on database. Updating...', job.data.filePath);
 
-      if (modules.config.SCAN_DIR_EXTRACT_COVER === 'noCoverOnly' && !exists.base64Thumbnail) {
-        try {
-          thumbnail = await extractCover(job.data.filePath, null);
-        } catch (errExtractImage) {
-          jobLogger.error({ err: errExtractImage }, 'Error extracting image from file');
-          thumbnail = undefined;
-        }
-      }
-
-      if (modules.config.SCAN_DIR_EXTRACT_COVER === 'noCoverOnly-deferred' && !exists.base64Thumbnail) {
-        try {
-          thumbnail = await extractCover(job.data.filePath, exists.id);
-        } catch (errExtractImage) {
-          jobLogger.error({ err: errExtractImage }, 'Error extracting image from file');
-          thumbnail = undefined;
-        }
-      }
-
-      if (modules.config.SCAN_DIR_EXTRACT_COVER === 'always-deferred') {
-        thumbnail = await extractCover(job.data.filePath, exists.id);
-      }
-
       await exists.$query()
         .update({
           chapterTitle: comicInfo.Title,
@@ -126,7 +107,6 @@ export default (modules: {
           comicInfo: JSON.stringify(comicInfo),
           summary: comicInfo.Summary,
           volume: comicInfo.Volume,
-          base64Thumbnail: thumbnail,
           website: comicInfo.Web,
           updatedAt: new Date(),
           publishedAt,
@@ -134,32 +114,20 @@ export default (modules: {
       return 'updated';
     }
 
-    if (modules.config.SCAN_DIR_EXTRACT_COVER === 'newOnly') {
-      try {
-        thumbnail = await extractCover(job.data.filePath, null);
-      } catch (errExtractImage) {
-        jobLogger.error({ err: errExtractImage }, 'Error extracting image from file');
-        thumbnail = undefined;
-      }
-    }
-
-    const newRow = await modules.models.ChaptersModel.query().insertAndFetch({
+    await modules.models.ChaptersModel.query().insertAndFetch({
       chapterTitle: comicInfo.Title,
       seriesTitle: comicInfo.Series,
       filePath: job.data.filePath,
       comicInfo: JSON.stringify(comicInfo),
       summary: comicInfo.Summary,
       volume: comicInfo.Volume,
-      base64Thumbnail: thumbnail,
       website: comicInfo.Web,
       createdAt: new Date(),
       updatedAt: new Date(),
       publishedAt,
     });
 
-    if (modules.config.SCAN_DIR_EXTRACT_COVER === 'newOnly-deferred' || modules.config.SCAN_DIR_EXTRACT_COVER === 'always-deferred') {
-      thumbnail = await extractCover(job.data.filePath, newRow.id);
-    }
+    await extractCover(job.data.filePath);
 
     return 'new';
   })

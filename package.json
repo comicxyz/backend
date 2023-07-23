@@ -16,7 +16,7 @@
     "dev-w": "yarn run nodemon --watch src -e ts,js,json,yml --ignore 'dist/*' --exec 'yarn run compile && node -r dotenv/config dist/workers/startWorkers.js'",
     "compile": "yarn tsc && yarn run copy-files",
     "start": "yarn run compile && node -r dotenv/config dist/server.js",
-    "copy-files": "mkdir dist/migrations; cp src/migrations/* dist/migrations"
+    "copy-files": "mkdir dist/migrations; cp src/migrations/* dist/migrations; cp src/workers/jobLogger.cjs dist/workers/jobLogger.cjs;"
   },
   "devDependencies": {
     "@jest/globals": "^29.4.3",

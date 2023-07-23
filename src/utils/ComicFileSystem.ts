@@ -6,6 +6,7 @@ import nodePath from 'path';
 import slugify from 'slugify';
 import { createReadStream } from 'fs';
 import dayjs from 'dayjs';
+import sanitize from 'sanitize-filename';
 
 enum DirLevel {
   ROOT,
@@ -175,7 +176,7 @@ export default class ComicFileSystem {
         const publishedAt = dayjs(file.publishedAt, 'YYYY-MM-DD');
         try {
           const stat = {
-            name: `${slugify(file.seriesTitle)} [${file.id}]`,
+            name: sanitize(`${slugify(file.seriesTitle)} [${file.id}]`),
             dev: 16777223,
             mode: 16877,
             nlink: 26,

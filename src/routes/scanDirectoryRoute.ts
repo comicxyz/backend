@@ -1,23 +1,34 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
-import recursiveReadDir from 'recursive-readdir';
-import path from 'path';
-import { addChapterToDbQueue } from '../workers/Queue.js';
+import { cronScanDirQueue } from '../workers/Queue.js';
 
 export default (fastify: FastifyInstance) => async (
-  req:FastifyRequest<{ Querystring: { dir: string } }>,
+  req:FastifyRequest<{ Body: {
+    scanNow: boolean,
+    cron: string,
+    dir: string, ext: string[], extractCover: 'always' | 'noCoverOnly' | 'never', skipExisting: boolean } }>,
   res:FastifyReply,
 ) => {
-  const comicDirs = await recursiveReadDir(
-    req.query.dir || fastify.config.MANGA_DIR,
+  let jobSettings;
+
+  if (!req.body.scanNow) {
+    jobSettings = {
+      jobId: req.body.dir,
+      repeat: {
+        cron: req.body.cron,
+      },
+    };
+  }
+  const job = await cronScanDirQueue.add(
+    {
+      config: {
+        MANGA_DIR: req.body.dir,
+        SCAN_DIR_EXT: req.body.ext,
+        SCAN_DIR_EXTRACT_COVER: req.body.extractCover,
+        SCAN_DIR_SKIP_EXISTING: req.body.skipExisting,
+      },
+    },
+    jobSettings,
   );
-  const files = comicDirs
-    .filter((file) => ['.cbz', '.zip', '.rar'].includes(path.extname(file)));
 
-  await addChapterToDbQueue
-    .addBulk(files.map((filePath) => ({ data: { filePath }, opts: { jobId: filePath } })))
-    .catch((err) => {
-      fastify.log.error({ err: err as Error }, 'Error add comic chapter to database');
-    });
-
-  return res.send({ files });
+  return res.send({ jobId: job.id });
 };

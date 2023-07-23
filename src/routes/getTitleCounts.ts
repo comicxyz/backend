@@ -14,5 +14,5 @@ export default (app: FastifyInstance) => async (req: FastifyRequest<{
     GROUP BY letter_group
     ORDER BY letter_group ASC`);
 
-  return res.send(data.rows);
+  return res.send({ letterGroups: data.rows });
 };

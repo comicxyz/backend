@@ -9,7 +9,6 @@ import {
 } from './hooks.js';
 import models from '../models/index.js';
 import { ScanProgressMessagingQueue, addChapterToDbQueue, cronScanDirQueue } from './Queue.js';
-import { AppConfig } from '../@types/AppConfig.js';
 
 type LoggerType = pino.BaseLogger & {
   child(bindings: pino.Bindings, options?: pino.ChildLoggerOptions): LoggerType
@@ -18,17 +17,14 @@ type LoggerType = pino.BaseLogger & {
 export default (modules: {
   log: LoggerType,
   models: typeof models,
-  config: AppConfig
   knex: Knex,
 }) => {
   const logger = modules.log.child({ worker: 'CronScanDir' });
-  logger.info({ config: modules.config }, 'Config');
   logger.info('Worker started');
 
   cronScanDirQueue.process(async (job) => {
     const jobLogger = logger.child({ jobId: job.id });
-    jobLogger.info({ config: modules.config }, 'Config');
-    jobLogger.info({ jobData: job.data }, 'Processing job (ID: %s)', job.id);
+    jobLogger.info({ jobData: job.data }, 'Processing job scanning directory (ID: %s)', job.id);
 
     onStartedScanDirectory(job)
       .catch((errHookStartedScandir) => {
@@ -39,6 +35,7 @@ export default (modules: {
       job.data.config.MANGA_DIR,
     );
 
+    // TODO: read from config
     const files = comicDirs
       .filter((file) => ['.cbz', '.zip', '.rar'].includes(path.extname(file)));
 
@@ -48,6 +45,8 @@ export default (modules: {
         data: {
           filePath,
           progressQueue: job.id.toString(),
+          skipExisting: job.data.config.SCAN_DIR_SKIP_EXISTING,
+          extractCover: job.data.config.SCAN_DIR_EXTRACT_COVER,
         },
         opts: { jobId: filePath },
       })))

@@ -20,8 +20,8 @@ exports.up = function (knex) {
           table.string('chapter_title', 255);
           table.integer('volume');
           table.text('comic_info');
-          table.string('file_path', 1000);
-          table.string('summary');
+          table.string('file_path', 1000).unique();
+          table.text('summary');
           table.text('base64_thumbnail')
           table.string('website', 500).index();
           table.date('published_at').index();

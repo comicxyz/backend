@@ -60,7 +60,7 @@ class ChaptersModel extends Model {
     queryContext: QueryContext,
   ) {
     await super.$beforeUpdate(opt, queryContext);
-    this.getLetterGroup();
+    if (this.seriesTitle) { this.getLetterGroup(); }
   }
 }
 

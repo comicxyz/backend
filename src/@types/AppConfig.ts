@@ -22,7 +22,7 @@ export type ScanDirConfigType = {
   SCAN_DIR_SKIP_EXISTING: boolean;
   SCAN_DIR_CRON: string;
   SCAN_DIR_NUM_WORKERS: number;
-  SCAN_DIR_EXTRACT_COVER: 'always' | 'noCoverOnly' | 'newOnly' | 'never' | 'always-deferred' | 'noCoverOnly-deferred' | 'newOnly-deferred';
+  SCAN_DIR_EXTRACT_COVER: 'always' | 'noCoverOnly' | 'never' ;
 };
 
 export type FTPConfigType = {

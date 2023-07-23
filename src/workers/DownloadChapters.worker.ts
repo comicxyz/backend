@@ -110,7 +110,7 @@ export default function DownloadChapters(app: {
     return {
       chapter: job.data,
       targetDirPath: dirPath,
-      outputPath: resolve(join(dirPath, '..', `${slugify(title)}-${slugify(seriesTitle)}.cbz`)),
+      outputPath: resolve(join(dirPath, '..', `${sanitize(slugify(title))}-${sanitize(slugify(seriesTitle))}.cbz`)),
     };
   }).catch((error) => {
     app.log.error({ err: error as Error });

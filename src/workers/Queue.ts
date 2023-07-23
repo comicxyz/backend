@@ -71,7 +71,7 @@ const ZipQueue = () => new Queue<{
 });
 
 const CronScanDirQueue = () => new Queue<{
-  config: AppConfig,
+  config: Pick<AppConfig, 'MANGA_DIR' | 'SCAN_DIR_EXT' | 'SCAN_DIR_EXTRACT_COVER' | 'SCAN_DIR_SKIP_EXISTING'>,
   progress?: {
     total: number,
     new: number,
@@ -91,6 +91,8 @@ const CronScanDirQueue = () => new Queue<{
 const AddChapterToDbQueue = () => new Queue<{
   filePath: string,
   progressQueue?: string,
+  skipExisting?: AppConfig['SCAN_DIR_SKIP_EXISTING'],
+  extractCover?: AppConfig['SCAN_DIR_EXTRACT_COVER'],
 }>('comicxyz:db:add-chapter', {
   createClient,
   defaultJobOptions: {
@@ -147,7 +149,6 @@ const ExtractCoverQueue = () => {
   const queueName = 'comicxyz:extract-cover';
   return new Queue<{
     file: string,
-    id: number,
   }>(
     queueName,
     {
