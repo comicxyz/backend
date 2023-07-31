@@ -1,4 +1,5 @@
 import { AxiosHeaders } from 'axios';
+import ComicList from './ComicListInterface';
 
 type GetChapterImagesInterface = {
   (url: string): Promise<string[]>;
@@ -11,7 +12,10 @@ type GetInfoFunctionType = () => {
   url: string
   disabled?: boolean,
   domains: string[],
+  searchFeature?: boolean,
 };
+
+type GetComicListFunctionType = (args?: { page?: number, search?: string }) => Promise<ComicList>;
 
 type GetDownloadImagesRequestHeadersFunctionType = (url: string) => AxiosHeaders;
 
@@ -24,4 +28,5 @@ export {
   GetInfoFunctionType,
   GetDownloadImagesRequestHeadersFunctionType,
   GetDownloadImagesRequestHeadersModuleType,
+  GetComicListFunctionType,
 };
