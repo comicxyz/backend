@@ -1,5 +1,5 @@
 import {
-  FastifyPluginCallback, FastifyReply, FastifyRequest,
+  FastifyPluginCallback,
 } from 'fastify';
 import fastifyPlugin from 'fastify-plugin';
 import scanDirectoryRoute from './scanDirectoryRoute.js';
@@ -23,7 +23,8 @@ import getCronScanDirJobsRoute from './getCronScanDirJobsRoute.js';
 import loadConfig from '../config/loadConfig.js';
 import getChaptersListRoute from './getChaptersListRoute.js';
 import getWatchedUrl from './getWatchedUrl.js';
-import { GetComicListFunctionType } from '../@types/DownloaderInterfaces.js';
+import browseComicOnServiceRoute from './browseComicOnServiceRoute.js';
+import restartJobRoute from './restartJobRoute.js';
 
 type ObjectionJsFastify = FastifyPluginCallback<ObjectionJsFastifyNs.ObjectionJsFastifyOptions>;
 
@@ -50,6 +51,7 @@ function registerRoutes(...[fastify, opts, done] : Parameters<ObjectionJsFastify
 
     fastify.get('/read-chapter/:chapterId', prepareReadComicRoute(fastify));
     fastify.get('/download-queue', downloadQueueRoute(fastify));
+    fastify.post('/retry-job/:jobId', restartJobRoute(fastify));
     fastify.post('/progress/:chapterId/:page/:totalPage', recordReadingProgressRoute(fastify));
 
     fastify.get(
@@ -68,12 +70,7 @@ function registerRoutes(...[fastify, opts, done] : Parameters<ObjectionJsFastify
     fastify.get('/download-logs/:jobId', getDownloadLogsRoute(fastify));
 
     fastify.get('/services', getDownloadersRoute(fastify));
-    fastify.get('/services/:downloader', async (req: FastifyRequest<{ Params: { downloader: string }, Querystring: { page: number, search: string } }>, res: FastifyReply) => {
-      const { default: fn } = await import(`../downloaders/${req.params.downloader}/getComics.js`) as { default: GetComicListFunctionType };
-      const page = req.query.page || 1;
-      const search = req.query.search || '';
-      res.send({ comics: await fn({ page, search }) });
-    });
+    fastify.get('/services/:downloader', browseComicOnServiceRoute);
     fastify.post('/services', downloadDownloaderRoute(fastify));
     fastify.delete('/services/:downloader', removeDownloaderRoute(fastify));
 
