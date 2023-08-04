@@ -71,7 +71,7 @@ export default function DownloadChapters(app: {
     let headers = {} as AxiosRequestHeaders;
     try {
       const getDownloadImagesRequestHeadersInternal: GetDownloadImagesRequestHeadersModuleType = await import(`../../${app.config.DOWNLOADERS_DIR}/${serviceDir}/getRequestHeaders.js`) as GetDownloadImagesRequestHeadersModuleType;
-      log.info('Special headers found');
+      log.info({ serviceDir }, 'Special headers found');
       getImageDownloadRequestHeaders = getDownloadImagesRequestHeadersInternal.default;
       headers = getImageDownloadRequestHeaders(url);
     } catch (err) {
@@ -132,5 +132,10 @@ export default function DownloadChapters(app: {
       }
     })
       .catch((err) => log.error({ err: err as Error }, 'Cannot add zip job'));
+  });
+
+  chaptersQueue.on('failed', (job, err) => {
+    const log = logger.child({ jobId: job.id, logJob: QUEUE_NAMES.DOWNLOAD_CHAPTERS });
+    log.error({ err: err as Error }, 'Chapter download failed %s %s (%s)', job.data.seriesTitle, job.data.title, job.name);
   });
 }
