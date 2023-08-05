@@ -70,7 +70,7 @@ function registerRoutes(...[fastify, opts, done] : Parameters<ObjectionJsFastify
     fastify.get('/download-logs/:jobId', getDownloadLogsRoute(fastify));
 
     fastify.get('/services', getDownloadersRoute(fastify));
-    fastify.get('/services/:downloader', browseComicOnServiceRoute);
+    fastify.get('/services/:downloader', browseComicOnServiceRoute(fastify));
     fastify.post('/services', downloadDownloaderRoute(fastify));
     fastify.delete('/services/:downloader', removeDownloaderRoute(fastify));
 
