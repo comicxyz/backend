@@ -15,7 +15,8 @@ type GetInfoFunctionType = () => {
   searchFeature?: boolean,
 };
 
-type GetComicListFunctionType = (args?: { page?: number, search?: string }) => Promise<ComicList>;
+type GetComicListFunctionType = (args?: {
+  page?: number, search?: string, category?: string }) => Promise<ComicList>;
 
 type GetDownloadImagesRequestHeadersFunctionType = (url: string) => AxiosHeaders;
 
