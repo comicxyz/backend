@@ -34,7 +34,7 @@ exports.up = function (knex) {
     .hasTable('reading_progress').then(exists => {
       if (!exists) {
         return knex.schema.createTable('reading_progress', (table) => {
-          table.specificType('chapter_id', 'int4').primary();
+          table.integer('chapter_id').primary();
           table.integer('current_page').index();
           table.string('progress', 3);
           table.timestamp('started_at', { useTz: true }).defaultTo(knex.fn.now());
