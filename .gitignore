@@ -10,3 +10,4 @@ manga/
 *.log
 build/
 **/dev.*
+db.sqlite
